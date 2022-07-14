@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Websocket Timer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        var socket = io();
+
+        socket.on('connect', function() {
+            socket.emit('my_event', {data: 'I\'m connected!'});
+        });
+
+        var start_time;
+        window.setInterval(function() {
+            start_time = (new Date).getTime();
+            $('#transport').text(socket.io.engine.transport.name);
+            socket.emit('my_ping');
+        }, 1000);
+
+        socket.on('my_pong', function() {
+            var latency = (new Date).getTime() - start_time;
+            $('#ping-pong').text(latency);
+        });
+    </script>
+</head>
+<body>
+    <h1>Websocket Timer</h1>
+    <p>
+      Latency: <b><span id="ping-pong"></span>ms</b>
+    </p>
+</body>
+</html>
