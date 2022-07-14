@@ -40,7 +40,7 @@
                     data: {
                         timestamp: (new Date()).toISOString(),
                         value: document.getElementById('timer').innerText,
-                        action: $form.attr('action')
+                        event: $("#startStopBtn").val(),
                     }
                 }).done(function() {
                     // console.log('success');
@@ -65,7 +65,7 @@
     <h2 id="timer"></h2>
 
     <form action="toggle" method="post">
-        <input type="submit" value="Stop" name="stop" id="startStopBtn">
+        <input type="submit" value="Start" id="startStopBtn">
     </form>
 </body>
 </html>
