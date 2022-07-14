@@ -10,13 +10,12 @@ services:
       - 5432
 
   websocket_timer:
-    build: .
+    # build: .
+    image: kuznetsov1024/websocket_timer:latest
     environment:
       SECRET_KEY: 1234
       DATABASE_URL: postgresql://postgres:1234@db:5432/websocket_timer
-    # volumes:
-    #   - .:/opt/websocket_timer
     ports:
-      - 8020:5000
+      - 80:5000
     depends_on:
       - db
