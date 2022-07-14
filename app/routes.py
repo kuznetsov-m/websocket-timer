@@ -16,8 +16,8 @@ def background_thread():
     while True:
         socketio.sleep(TIMER_INTERVAL)
         socketio.emit(
-            'timer_tick_event',
-            {'data': 'Server timer event', 'timer': value}
+            'timer_event',
+            {'data': 'Server timer event', 'value': value, 'is_started': is_timer_started}
         )
         value = value + TIMER_INTERVAL if is_timer_started else 0
 
@@ -50,7 +50,7 @@ def toggle():
         'event': request.form.get('event'),
     }
 
-    socketio.emit('timer_event', data)
+    socketio.emit('timer_toggle_event', data)
     
     return data
 
@@ -64,8 +64,8 @@ def connect():
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(background_thread)
-    global is_timer_started
-    emit('my_response', {'data': 'Connected', 'is_timer_started': is_timer_started})
+    # global is_timer_started
+    # emit('my_response', {'data': 'Connected', 'is_timer_started': is_timer_started})
 
 @socketio.on('disconnect')
 def test_disconnect():

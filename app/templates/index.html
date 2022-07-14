@@ -11,14 +11,20 @@
             socket.emit('my_event', {data: 'I\'m connected!'});
         });
 
-        socket.on('my_response', function(msg, cb) {
-            console.log(msg);
-        });
+        // socket.on('my_response', function(msg, cb) {
+        //     console.log(msg);
+        // });
 
-        socket.on('timer_tick_event', function(msg, cb) {
-            let timer = document.getElementById('timer');
-            let d = (new Date((Number(msg.timer) || 0) * 1000));
-            timer.innerText = d.toISOString().split('T')[1].slice(0, 8)
+        socket.on('timer_event', function(msg, cb) {
+            const timer = document.getElementById('timer');
+            const d = (new Date((Number(msg.value) || 0) * 1000));
+            timer.innerText = d.toISOString().split('T')[1].slice(0, 8);
+            
+            document.getElementById('toggleBtn').setAttribute(
+                'value',
+                msg.is_started ? 'Stop' : 'Start'
+            );
+            document.getElementById('toggleForm').removeAttribute('hidden');
         });
 
         var start_time;
@@ -33,23 +39,14 @@
             $('#ping-pong').text(latency);
         });
 
-        socket.on('timer_event', function(msg, cb) {
-            // console.log(msg)
-
-            const toFormatString = (d) => {
-                return d.toLocaleString(undefined, {
-                    year: 'numeric', month: '2-digit', day: '2-digit',
-                    hour: '2-digit', hour12: false, minute:'2-digit', second:'2-digit'
-                })
-            }
-
-            let table = document.body.querySelector('table');
-            let row = table.insertRow();
+        socket.on('timer_toggle_event', function(msg, cb) {
+            const table = document.body.querySelector('table');
+            const row = table.insertRow();
             
             for (let key in msg) {
-                let cell = row.insertCell()
+                const cell = row.insertCell()
                 if (key === 'timestamp') {
-                    let date = new Date(msg[key])
+                    const date = new Date(msg[key])
                     cell.innerText = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
                 } else {
                     cell.innerText = msg[key]
@@ -59,7 +56,8 @@
 
         $(function() {
             $('form').submit(function(e) {
-                var $form = $(this);
+                const $form = $(this);
+                const event = $("#toggleBtn").val();
                 $.ajax({
                     type: $form.attr('method'),
                     url: $form.attr('action'),
@@ -67,17 +65,13 @@
                     data: {
                         timestamp: (new Date()).toISOString(),
                         value: document.getElementById('timer').innerText,
-                        event: $("#startStopBtn").val(),
+                        event: event,
                     }
                 }).done(function() {
-                    // console.log('success');
-                    let btn = document.getElementById('startStopBtn');
-                    btn.setAttribute(
+                    document.getElementById('toggleBtn').setAttribute(
                         'value',
-                        btn.getAttribute('value') == 'Start' ? 'Stop' : 'Start'
+                        event === 'Start' ? 'Stop' : 'Start'
                     );
-                }).fail(function() {
-                    // console.log('fail');
                 });
                 e.preventDefault();
             });
@@ -95,8 +89,8 @@
     
     <h2 id="timer"></h2>
 
-    <form action="toggle" method="post">
-        <input type="submit" value="Start" id="startStopBtn">
+    <form action="toggle" method="post" hidden id="toggleForm">
+        <input type="submit" value="Start" id="toggleBtn">
     </form>
 
     <table id="events">
