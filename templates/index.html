@@ -29,13 +29,43 @@
             var latency = (new Date).getTime() - start_time;
             $('#ping-pong').text(latency);
         });
+
+        $(function() {
+            $('form').submit(function(e) {
+                var $form = $(this);
+                $.ajax({
+                    type: $form.attr('method'),
+                    url: $form.attr('action'),
+                    // data: $form.serialize()
+                    data: {
+                        timestamp: (new Date()).toISOString(),
+                        value: document.getElementById('timer').innerText,
+                        action: $form.attr('action')
+                    }
+                }).done(function() {
+                    // console.log('success');
+                    let btn = document.getElementById('startStopBtn');
+                    btn.setAttribute(
+                        'value',
+                        btn.getAttribute('value') == 'Start' ? 'Stop' : 'Start'
+                    );
+                }).fail(function() {
+                    // console.log('fail');
+                });
+                e.preventDefault();
+            });
+        });
     </script>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 </head>
 <body>
     <h1>Websocket Timer</h1>
-    <p>
-      Latency: <b><span id="ping-pong"></span>ms</b>
-    </p>
+    <p>Latency: <b><span id="ping-pong"></span>ms</b></p>
+    
     <h2 id="timer"></h2>
+
+    <form action="toggle" method="post">
+        <input type="submit" value="Stop" name="stop" id="startStopBtn">
+    </form>
 </body>
 </html>
