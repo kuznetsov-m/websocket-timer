@@ -8,7 +8,7 @@ from datetime import datetime
 
 thread = None
 thread_lock = Lock()
-isTimerStarted = False
+is_timer_started = False
 
 def background_thread():
     TIMER_INTERVAL = 0.5
@@ -16,10 +16,10 @@ def background_thread():
     while True:
         socketio.sleep(TIMER_INTERVAL)
         socketio.emit(
-            'my_response',
+            'timer_tick_event',
             {'data': 'Server timer event', 'timer': value}
         )
-        value = value + TIMER_INTERVAL if isTimerStarted else 0
+        value = value + TIMER_INTERVAL if is_timer_started else 0
 
 @app.route('/')
 def index():
@@ -36,8 +36,13 @@ def toggle():
     db.session.add(event)
     db.session.commit()
 
-    global isTimerStarted
-    isTimerStarted = not isTimerStarted
+    timer_events = {
+        'start': True,
+        'stop': False
+    }
+
+    global is_timer_started
+    is_timer_started = timer_events.get(request.form.get('event').lower())
 
     data = {
         'timestamp': request.form.get('timestamp'),
@@ -59,7 +64,8 @@ def connect():
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(background_thread)
-    emit('my_response', {'data': 'Connected'})
+    global is_timer_started
+    emit('my_response', {'data': 'Connected', 'is_timer_started': is_timer_started})
 
 @socketio.on('disconnect')
 def test_disconnect():

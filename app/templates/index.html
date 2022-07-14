@@ -9,10 +9,13 @@
 
         socket.on('connect', function() {
             socket.emit('my_event', {data: 'I\'m connected!'});
-            document.getElementById('timer').innerText = '00:00:00'
         });
 
         socket.on('my_response', function(msg, cb) {
+            console.log(msg);
+        });
+
+        socket.on('timer_tick_event', function(msg, cb) {
             let timer = document.getElementById('timer');
             let d = (new Date((Number(msg.timer) || 0) * 1000));
             timer.innerText = d.toISOString().split('T')[1].slice(0, 8)
@@ -31,8 +34,7 @@
         });
 
         socket.on('timer_event', function(msg, cb) {
-            console.log(msg)
-            // alert('timer_event');
+            // console.log(msg)
 
             const toFormatString = (d) => {
                 return d.toLocaleString(undefined, {
@@ -79,6 +81,10 @@
                 });
                 e.preventDefault();
             });
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('timer').innerText = '00:00:00'
         });
     </script>
     <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
