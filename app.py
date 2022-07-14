@@ -1,3 +1,4 @@
+from threading import Lock
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import os
@@ -5,6 +6,19 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
 socketio = SocketIO(app)
+thread = None
+thread_lock = Lock()
+
+def background_thread():
+    TIMER_INTERVAL = 0.5
+    value = 0
+    while True:
+        socketio.sleep(TIMER_INTERVAL)
+        value += TIMER_INTERVAL
+        socketio.emit(
+            'my_response',
+            {'data': 'Server timer event', 'timer': value}
+        )
 
 @app.route('/')
 def index():
@@ -16,6 +30,10 @@ def my_ping():
 
 @socketio.event
 def connect():
+    global thread
+    with thread_lock:
+        if thread is None:
+            thread = socketio.start_background_task(background_thread)
     emit('my_response', {'data': 'Connected'})
 
 @socketio.on('disconnect')

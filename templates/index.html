@@ -9,6 +9,13 @@
 
         socket.on('connect', function() {
             socket.emit('my_event', {data: 'I\'m connected!'});
+            document.getElementById('timer').innerText = '00:00:00'
+        });
+
+        socket.on('my_response', function(msg, cb) {
+            let timer = document.getElementById('timer');
+            let d = (new Date((Number(msg.timer) || 0) * 1000));
+            timer.innerText = d.toISOString().split('T')[1].slice(0, 8)
         });
 
         var start_time;
@@ -29,5 +36,6 @@
     <p>
       Latency: <b><span id="ping-pong"></span>ms</b>
     </p>
+    <h2 id="timer"></h2>
 </body>
 </html>
