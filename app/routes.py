@@ -1,18 +1,10 @@
 from threading import Lock
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
-import os
-from dotenv import load_dotenv
+from app import app, socketio
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv(os.path.join(basedir, '.env'))
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
-socketio = SocketIO(app)
 thread = None
 thread_lock = Lock()
-
 isTimerStarted = False
 
 def background_thread():
@@ -32,6 +24,7 @@ def index():
 
 @app.route('/toggle', methods=['POST'])
 def stop():
+    print(request.form)
     global isTimerStarted
     isTimerStarted = not isTimerStarted
     return jsonify()
@@ -51,7 +44,3 @@ def connect():
 @socketio.on('disconnect')
 def test_disconnect():
     print('Client disconnected', request.sid)
-
-
-if __name__ == '__main__':
-    socketio.run(app)
