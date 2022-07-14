@@ -26,7 +26,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/toggle', methods=['POST'])
-def stop():
+def toggle():
     event = Event()
     event.from_dict({
         'timestamp': datetime.strptime(request.form.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%fZ"),
@@ -38,8 +38,16 @@ def stop():
 
     global isTimerStarted
     isTimerStarted = not isTimerStarted
+
+    data = {
+        'timestamp': request.form.get('timestamp'),
+        'value': request.form.get('value'),
+        'event': request.form.get('event'),
+    }
+
+    socketio.emit('timer_event', data)
     
-    return jsonify()
+    return data
 
 @socketio.event
 def my_ping():
