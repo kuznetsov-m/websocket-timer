@@ -1,7 +1,10 @@
 from threading import Lock
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
-from app import app, socketio
+from app import app, socketio, db
+from app.models import Event
+from datetime import datetime
+
 
 thread = None
 thread_lock = Lock()
@@ -24,9 +27,18 @@ def index():
 
 @app.route('/toggle', methods=['POST'])
 def stop():
-    print(request.form)
+    event = Event()
+    event.from_dict({
+        'timestamp': datetime.strptime(request.form.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%fZ"),
+        'value': request.form.get('value'),
+        'event': request.form.get('event')
+    })
+    db.session.add(event)
+    db.session.commit()
+
     global isTimerStarted
     isTimerStarted = not isTimerStarted
+    
     return jsonify()
 
 @socketio.event

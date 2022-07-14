@@ -9,3 +9,8 @@ class Event(db.Model):
 
     def __repr__(self):
         return f'<Event {self.timestamp} {self.value} {self.event}>'
+
+    def from_dict(self, data, new_user=False):
+        for field in ['timestamp', 'value', 'event']:
+            if field in data:
+                setattr(self, field, data[field])
