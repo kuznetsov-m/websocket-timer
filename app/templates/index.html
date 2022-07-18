@@ -15,56 +15,58 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
-        var socket = io();
+        $(document).ready(function() {
+            var socket = io(null, {
+                transports: [ 'websocket' ],
+                rememberTransport: false
+            });
 
-        socket.on('connect', function () {
-            socket.emit('my_event', { data: 'I\'m connected!' });
-        });
+            socket.on('connect', function () {
+                socket.emit('my_event', { data: 'I\'m connected!' });
+            });
 
-        // socket.on('my_response', function(msg, cb) {
-        //     console.log(msg);
-        // });
+            // socket.on('my_response', function(msg, cb) {
+            //     console.log(msg);
+            // });
 
-        socket.on('timer_event', function (msg, cb) {
-            const timer = document.getElementById('timer');
-            const d = (new Date((Number(msg.value) || 0) * 1000));
-            timer.innerText = d.toISOString().split('T')[1].slice(0, 8);
+            socket.on('timer_event', function (msg, cb) {
+                const timer = document.getElementById('timer');
+                const d = (new Date((Number(msg.value) || 0) * 1000));
+                timer.innerText = d.toISOString().split('T')[1].slice(0, 8);
 
-            document.getElementById('toggleBtn').setAttribute(
-                'value',
-                msg.is_started ? 'Stop' : 'Start'
-            );
-            document.getElementById('toggleForm').removeAttribute('hidden');
-        });
+                document.getElementById('toggleBtn').setAttribute(
+                    'value',
+                    msg.is_started ? 'Stop' : 'Start'
+                );
+                document.getElementById('toggleForm').removeAttribute('hidden');
+            });
 
-        var start_time;
-        window.setInterval(function () {
-            start_time = (new Date).getTime();
-            $('#transport').text(socket.io.engine.transport.name);
-            socket.emit('my_ping');
-        }, 1000);
+            var start_time;
+            window.setInterval(function () {
+                start_time = (new Date).getTime();
+                socket.emit('my_ping');
+            }, 1000);
 
-        socket.on('my_pong', function () {
-            var latency = (new Date).getTime() - start_time;
-            $('#ping-pong').text(latency);
-        });
+            socket.on('my_pong', function () {
+                const latency = (new Date).getTime() - start_time;
+                $('#ping-pong').text(latency);
+            });
 
-        socket.on('timer_toggle_event', function (msg, cb) {
-            const table = document.body.querySelector('table');
-            const row = table.insertRow();
+            socket.on('timer_toggle_event', function (msg, cb) {
+                const table = document.body.querySelector('table');
+                const row = table.insertRow();
 
-            for (let key in msg) {
-                const cell = row.insertCell()
-                if (key === 'timestamp') {
-                    const date = new Date(msg[key])
-                    cell.innerText = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
-                } else {
-                    cell.innerText = msg[key]
+                for (let key in msg) {
+                    const cell = row.insertCell()
+                    if (key === 'timestamp') {
+                        const date = new Date(msg[key])
+                        cell.innerText = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+                    } else {
+                        cell.innerText = msg[key]
+                    }
                 }
-            }
-        });
+            });
 
-        $(function () {
             $('form').submit(function (e) {
                 const $form = $(this);
                 const event = $("#toggleBtn").val();
@@ -85,10 +87,8 @@
                 });
                 e.preventDefault();
             });
-        });
 
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById('timer').innerText = '00:00:00'
+            document.getElementById('timer').innerText = '00:00:00';
         });
     </script>
     <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
