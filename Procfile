@@ -1,1 +1,1 @@
-web: flask db upgrade; gunicorn websocket_timer:app
+web: flask db upgrade; gunicorn --worker-class eventlet websocket_timer:app 
